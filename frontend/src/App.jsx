@@ -447,6 +447,14 @@ function ProgramCards() {
 
 function ReferralLinkPanel() {
   const referralLink = "https://xkld-points.vn/ref/CTV-001";
+  const [copied, setCopied] = useState(false);
+
+  const copyReferralLink = async () => {
+    await navigator.clipboard?.writeText(referralLink);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+
   return (
     <div className="grid gap-5 xl:grid-cols-[1fr_1.2fr]">
       <Card>
@@ -457,9 +465,9 @@ function ReferralLinkPanel() {
         <CardContent className="space-y-4">
           <div className="rounded-md border bg-muted/60 p-3 font-mono text-sm">{referralLink}</div>
           <div className="flex flex-wrap gap-2">
-            <Button>
+            <Button onClick={copyReferralLink}>
               <ClipboardCopy className="h-4 w-4" />
-              Copy link
+              {copied ? "Da copy" : "Copy link"}
             </Button>
             <Button variant="outline">
               <Send className="h-4 w-4" />
@@ -556,6 +564,14 @@ export default function App() {
   const allowed = navItems.some((item) => item.label === active && item.roles.includes(role));
   const visibleActive = allowed ? active : "Dashboard";
 
+  const handleRoleChange = (nextRole) => {
+    setRole(nextRole);
+    const nextRoleCanViewActivePage = navItems.find((item) => item.label === active)?.roles.includes(nextRole);
+    if (!nextRoleCanViewActivePage) {
+      setActive("Dashboard");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/35 text-foreground">
       <div className="lg:flex">
@@ -564,12 +580,7 @@ export default function App() {
         <div className="min-w-0 flex-1">
           <Header
             role={role}
-            setRole={(nextRole) => {
-              setRole(nextRole);
-              if (nextRole === "CTV" && !navItems.find((item) => item.label === active)?.roles.includes("CTV")) {
-                setActive("Dashboard");
-              }
-            }}
+            setRole={handleRoleChange}
             onMenu={() => setOpen(true)}
           />
           <main className="mx-auto max-w-7xl p-4 sm:p-6">

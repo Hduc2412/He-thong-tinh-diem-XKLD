@@ -4,10 +4,19 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          charts: ["recharts"],
+          icons: ["lucide-react"],
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(process.cwd(), "src"),
     },
   },
 });
-
