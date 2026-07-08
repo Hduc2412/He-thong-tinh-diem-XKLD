@@ -30,8 +30,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { activityEvents, collaborators, customers, performanceData, pointPrograms, pointRequests, riskSignals, tree } from "@/data/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, roles: ["Admin", "CTV"] },
@@ -70,6 +71,70 @@ function StatCard({ title, value, note, icon: Icon, tone }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function formatMoney(value) {
+  return Number(value || 0).toLocaleString("vi-VN");
+}
+
+function mapCustomerStatus(status) {
+  const labels = {
+    REGISTERED: "Da dang ky",
+    INTERVIEW_DONE: "Da phong van",
+    PASSED: "Da dat",
+    DEPARTED: "Da xuat canh",
+  };
+
+  return labels[status] || status;
+}
+
+function LoginScreen({ onLogin }) {
+  const [email, setEmail] = useState("admin@xkld.local");
+  const [password, setPassword] = useState("123456");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const session = await api.login({ email, password });
+      onLogin(session);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="grid min-h-screen place-items-center bg-muted/35 p-4 text-foreground">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Dang nhap he thong</CardTitle>
+          <CardDescription>Su dung tai khoan Admin hoac CTV da duoc cap</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-4" onSubmit={submit}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="email">Email</label>
+              <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="password">Mat khau</label>
+              <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            </div>
+            {error && <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+            <Button className="w-full" disabled={loading}>
+              {loading ? "Dang dang nhap..." : "Dang nhap"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </main>
   );
 }
 
@@ -127,7 +192,7 @@ function Sidebar({ role, open, setOpen, active, setActive }) {
   );
 }
 
-function Header({ role, setRole, onMenu }) {
+function Header({ role, setRole, onMenu, user, onLogout }) {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
       <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
@@ -155,20 +220,26 @@ function Header({ role, setRole, onMenu }) {
               </button>
             ))}
           </div>
+          <div className="hidden text-right sm:block">
+            <p className="text-sm font-medium">{user?.name}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
+          </div>
+          <Button variant="outline" onClick={onLogout}>Dang xuat</Button>
         </div>
       </div>
     </header>
   );
 }
 
-function Dashboard({ role }) {
+function Dashboard({ role, dashboardData }) {
+  const stats = dashboardData || {};
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Tong CTV" value={role === "Admin" ? "128" : "12"} note="+8 trong thang" icon={Users} tone="bg-primary/10 text-primary" />
-        <StatCard title="Khach hang" value="1,284" note="326 dang xu ly" icon={UserRound} tone="bg-sky-100 text-sky-700" />
-        <StatCard title="Diem thang" value="9,120" note="+14.2% so voi thang truoc" icon={Star} tone="bg-warning/20 text-amber-700" />
-        <StatCard title="Luong/KPI" value="276 tr" note="Da tam tinh den hom nay" icon={CircleDollarSign} tone="bg-success/15 text-success" />
+        <StatCard title="Tong CTV" value={role === "Admin" ? stats.ctvCount ?? 0 : 1} note="Du lieu tu backend" icon={Users} tone="bg-primary/10 text-primary" />
+        <StatCard title="Khach hang" value={stats.customerCount ?? 0} note="Dang luu trong MongoDB" icon={UserRound} tone="bg-sky-100 text-sky-700" />
+        <StatCard title="Diem thang" value={formatMoney(stats.totalPoints)} note={stats.month || "Thang hien tai"} icon={Star} tone="bg-warning/20 text-amber-700" />
+        <StatCard title="Luong/KPI" value={`${formatMoney(stats.estimatedSalary)} VND`} note="Tam tinh theo diem" icon={CircleDollarSign} tone="bg-success/15 text-success" />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
@@ -262,7 +333,7 @@ function CollaboratorTable() {
   );
 }
 
-function CustomerTable() {
+function CustomerTable({ items = customers }) {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -284,15 +355,15 @@ function CustomerTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {customers.map((item) => (
-              <TableRow key={item.name}>
+            {items.map((item) => (
+              <TableRow key={item._id || item.name}>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>{item.market}</TableCell>
-                <TableCell>{item.owner}</TableCell>
+                <TableCell>{typeof item.owner === "string" ? item.owner : item.owner?.name}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{item.stage}</Badge>
+                  <Badge variant="outline">{mapCustomerStatus(item.status || item.stage)}</Badge>
                 </TableCell>
-                <TableCell>{item.points}</TableCell>
+                <TableCell>{item.points || 0}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -302,7 +373,7 @@ function CustomerTable() {
   );
 }
 
-function RequestsTable() {
+function RequestsTable({ pointItems }) {
   const [requests, setRequests] = useState(pointRequests);
   const updateStatus = (id, status) => {
     setRequests((current) => current.map((item) => (item.id === id ? { ...item, status } : item)));
@@ -335,19 +406,19 @@ function RequestsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requests.map((item) => (
+            {(pointItems?.length ? pointItems : requests).map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.id}</TableCell>
-                <TableCell>{item.ctv}</TableCell>
-                <TableCell>{item.customer}</TableCell>
-                <TableCell>{item.reason}</TableCell>
-                <TableCell>+{item.point}</TableCell>
-                <TableCell>{item.salary.toLocaleString("vi-VN")} VND</TableCell>
+                <TableCell className="font-medium">{item.id || item.pointCode?.code}</TableCell>
+                <TableCell>{item.ctv || item.beneficiary?.name}</TableCell>
+                <TableCell>{item.customer?.name || item.customer}</TableCell>
+                <TableCell>{item.reason || item.note}</TableCell>
+                <TableCell>+{item.point || item.points}</TableCell>
+                <TableCell>{formatMoney(item.salary || (item.points || 0) * 10000)} VND</TableCell>
                 <TableCell>
-                  <Badge variant={statusVariant(item.status)}>{item.status}</Badge>
+                  <Badge variant={statusVariant(item.status || "Da duyet")}>{item.status || "Da duyet"}</Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex justify-end gap-2">
+                  <div className={cn("flex justify-end gap-2", pointItems?.length && "hidden")}>
                     <Button variant="outline" size="sm" onClick={() => updateStatus(item.id, "Da duyet")}>
                       Duyet
                     </Button>
@@ -445,7 +516,7 @@ function ProgramCards() {
   );
 }
 
-function ReferralLinkPanel() {
+function ReferralLinkPanel({ customerItems }) {
   const referralLink = "https://xkld-points.vn/ref/CTV-001";
   const [copied, setCopied] = useState(false);
 
@@ -476,7 +547,7 @@ function ReferralLinkPanel() {
           </div>
         </CardContent>
       </Card>
-      <CustomerTable />
+      <CustomerTable items={customerItems} />
     </div>
   );
 }
@@ -542,24 +613,67 @@ function RiskPanel() {
   );
 }
 
-function MainContent({ active, role }) {
+function MainContent({ active, role, dashboardData, customerItems, pointItems }) {
   if (active === "Chuong trinh diem") return <ProgramCards />;
   if (active === "Quan ly CTV") return <CollaboratorTable />;
   if (active === "So do cay") return <TreeView />;
-  if (active === "Khach hang") return <CustomerTable />;
-  if (active === "Link gioi thieu") return <ReferralLinkPanel />;
-  if (active === "De nghi cong diem" || active === "Lich su diem") return <RequestsTable />;
+  if (active === "Khach hang") return <CustomerTable items={customerItems} />;
+  if (active === "Link gioi thieu") return <ReferralLinkPanel customerItems={customerItems} />;
+  if (active === "De nghi cong diem" || active === "Lich su diem") return <RequestsTable pointItems={pointItems} />;
   if (active === "Hoat dong") return <ActivityTable />;
   if (active === "Canh bao rui ro") return <RiskPanel />;
   if (active === "Hieu suat" || active === "Luong/KPI") return <KpiPanel />;
   if (active === "Cai dat") return <KpiPanel />;
-  return <Dashboard role={role} />;
+  return <Dashboard role={role} dashboardData={dashboardData} />;
 }
 
 export default function App() {
-  const [role, setRole] = useState("Admin");
+  const [session, setSession] = useState(() => {
+    const stored = localStorage.getItem("xkld-session");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [role, setRole] = useState(session?.user?.role || "Admin");
   const [active, setActive] = useState("Dashboard");
   const [open, setOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [customerItems, setCustomerItems] = useState(customers);
+  const [pointItems, setPointItems] = useState([]);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    if (!session?.token) return;
+
+    setRole(session.user.role);
+    setLoadError("");
+
+    Promise.all([
+      api.dashboard(session.token),
+      api.customers(session.token),
+      api.points(session.token),
+    ])
+      .then(([dashboardResponse, customersResponse, pointsResponse]) => {
+        setDashboardData(dashboardResponse.data);
+        setCustomerItems(customersResponse.data);
+        setPointItems(pointsResponse.data);
+      })
+      .catch((error) => setLoadError(error.message));
+  }, [session]);
+
+  const handleLogin = (nextSession) => {
+    localStorage.setItem("xkld-session", JSON.stringify(nextSession));
+    setSession(nextSession);
+    setActive("Dashboard");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("xkld-session");
+    setSession(null);
+    setActive("Dashboard");
+  };
+
+  if (!session) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
 
   const allowed = navItems.some((item) => item.label === active && item.roles.includes(role));
   const visibleActive = allowed ? active : "Dashboard";
@@ -582,6 +696,8 @@ export default function App() {
             role={role}
             setRole={handleRoleChange}
             onMenu={() => setOpen(true)}
+            user={session.user}
+            onLogout={handleLogout}
           />
           <main className="mx-auto max-w-7xl p-4 sm:p-6">
             <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
@@ -589,9 +705,10 @@ export default function App() {
                 <p className="text-sm font-medium text-primary">{role}</p>
                 <h2 className="text-2xl font-semibold tracking-normal">{visibleActive}</h2>
               </div>
-              <Badge variant="secondary">Frontend React JS + Tailwind + shadcn style</Badge>
+              <Badge variant="secondary">API backend http://127.0.0.1:4100/api</Badge>
             </div>
-            <MainContent active={visibleActive} role={role} />
+            {loadError && <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{loadError}</p>}
+            <MainContent active={visibleActive} role={role} dashboardData={dashboardData} customerItems={customerItems} pointItems={pointItems} />
           </main>
         </div>
       </div>
