@@ -19,6 +19,19 @@ Prototype frontend cho he thong quan ly cong tac vien (CTV), khach hang, diem th
 He-thong-tinh-diem-XKLD-frontend/
 ├─ README.md
 ├─ .gitignore
+├─ backend/
+│  ├─ package.json
+│  ├─ .env.example
+│  └─ src/
+│     ├─ app.js
+│     ├─ server.js
+│     ├─ config/
+│     ├─ controllers/
+│     ├─ middlewares/
+│     ├─ models/
+│     ├─ routes/
+│     ├─ scripts/
+│     └─ utils/
 └─ frontend/
    ├─ index.html
    ├─ package.json
@@ -144,6 +157,7 @@ Yeu cau:
 
 - Node.js
 - npm
+- MongoDB neu chay backend local
 
 Chay frontend:
 
@@ -153,10 +167,33 @@ npm install
 npm run dev
 ```
 
+Chay backend:
+
+```bash
+cd backend
+npm install
+copy .env.example .env
+npm run seed
+npm run dev
+```
+
 Mac dinh Vite chay tai:
 
 ```text
 http://127.0.0.1:5173
+```
+
+Backend API mac dinh chay tai:
+
+```text
+http://127.0.0.1:4000/api
+```
+
+Tai khoan seed:
+
+```text
+Admin: admin@xkld.local / 123456
+CTV:   ctv@xkld.local / 123456
 ```
 
 Build ban production:
