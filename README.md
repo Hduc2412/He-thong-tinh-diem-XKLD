@@ -1,227 +1,69 @@
-# He thong tinh diem CTV Xuat khau lao dong
+# Frontend hệ thống tính điểm CTV XKLD
 
-Prototype frontend cho he thong quan ly cong tac vien (CTV), khach hang, diem thuong, KPI va luong trong nghiep vu xuat khau lao dong.
+Giao diện quản trị và cộng tác viên cho hệ thống điểm thưởng xuất khẩu lao động. Frontend sử dụng API Cloudflare Worker/D1 tại `http://127.0.0.1:8787`.
 
-## Cong cu va cong nghe
+## Công nghệ
 
-- React 18
-- Vite 6
-- Tailwind CSS
-- Component UI theo phong cach shadcn/ui
-- Lucide React cho icon
-- Recharts cho bieu do dashboard
-- JavaScript ES Modules
-- npm cho quan ly thu vien
-
-## Cau truc du an
-
-```text
-He-thong-tinh-diem-XKLD-frontend/
-├─ README.md
-├─ .gitignore
-├─ backend/
-│  ├─ package.json
-│  ├─ .env.example
-│  └─ src/
-│     ├─ app.js
-│     ├─ server.js
-│     ├─ config/
-│     ├─ controllers/
-│     ├─ middlewares/
-│     ├─ models/
-│     ├─ routes/
-│     ├─ scripts/
-│     └─ utils/
-└─ frontend/
-   ├─ index.html
-   ├─ package.json
-   ├─ vite.config.js
-   ├─ tailwind.config.js
-   ├─ postcss.config.js
-   ├─ jsconfig.json
-   ├─ FRONTEND_NOTES.md
-   └─ src/
-      ├─ main.jsx
-      ├─ App.jsx
-      ├─ index.css
-      ├─ data/
-      │  └─ mockData.js
-      ├─ lib/
-      │  └─ utils.js
-      └─ components/
-         └─ ui/
-            ├─ badge.jsx
-            ├─ button.jsx
-            ├─ card.jsx
-            ├─ input.jsx
-            └─ table.jsx
-```
-
-## Vai tro cac file chinh
-
-- `frontend/src/main.jsx`: diem khoi dong React, render `App`.
-- `frontend/src/App.jsx`: man hinh chinh, sidebar, header, dashboard, cac bang quan ly va logic chuyen vai tro Admin/CTV.
-- `frontend/src/data/mockData.js`: du lieu mau cho CTV, khach hang, de nghi cong diem, chuong trinh diem, nhat ky hoat dong, canh bao rui ro va cay gioi thieu.
-- `frontend/src/components/ui`: cac component dung lai nhu Button, Card, Table, Input va Badge.
-- `frontend/src/index.css`: bien mau, style nen, font va cau hinh Tailwind base.
-- `frontend/FRONTEND_NOTES.md`: ghi chu anh xa bai toan CTV XKLD tu cac mo hinh referral/affiliate.
-
-## Luong chay frontend
-
-```text
-npm run dev
--> Vite doc vite.config.js
--> index.html nap src/main.jsx
--> main.jsx render App.jsx
--> App.jsx lay du lieu tu mockData.js
--> Hien thi cac man hinh theo role Admin hoac CTV
-```
-
-## Luong nghiep vu Admin
-
-```text
-Dang nhap / vao dashboard
--> Xem tong CTV, khach hang, diem thang va luong tam tinh
--> Quan ly danh sach CTV
--> Xem so do cay gioi thieu
--> Theo doi khach hang theo CTV phu trach
--> Tao hoac xu ly de nghi cong diem
--> Duyet / tu choi diem
--> Xem nhat ky hoat dong va canh bao rui ro
--> Tong hop hieu suat, KPI va luong thang
-```
-
-## Luong nghiep vu CTV
-
-```text
-Vao dashboard ca nhan
--> Xem khach hang cua minh
--> Lay link gioi thieu ca nhan
--> Theo doi trang thai de nghi cong diem
--> Xem lich su diem
--> Xem hieu suat va luong/KPI ca nhan
-```
-
-## Co che cong diem du kien
-
-Theo tai lieu nghiep vu, diem khong phat sinh ngay khi khach hang dang ky. Diem duoc ghi nhan sau khi khach hang phong van thanh cong va Admin tao ma xac nhan.
-
-```text
-CTV tao khach hang
--> Khach hang dang ky
--> Ho so duoc luu voi trang thai REGISTERED
--> Khach hang phong van
--> Admin kiem tra ket qua
--> Admin gui ma xac nhan
--> CTV nhap ma
--> He thong xac thuc ma
--> Sinh giao dich cong diem
--> CTV truc tiep nhan diem
--> CTV cap tren nhan diem chia se
--> Tong hop thang
--> Tinh luong/KPI
-```
-
-Moi ma xac nhan chi duoc dung mot lan. Tat ca giao dich cong diem can luu lich su de doi soat va chong gian lan.
-
-## Phan quyen man hinh hien tai
-
-Admin co the xem:
-
-- Dashboard
-- Chuong trinh diem
-- Quan ly CTV
-- So do cay
-- Khach hang
-- De nghi cong diem
-- Hoat dong
-- Canh bao rui ro
-- Lich su diem
-- Hieu suat
-- Luong/KPI
-- Cai dat
-
-CTV co the xem:
-
-- Dashboard
-- Khach hang
-- Link gioi thieu
-- De nghi cong diem
-- Lich su diem
-- Hieu suat
-- Luong/KPI
-
-## Cai dat va chay du an
-
-Yeu cau:
-
-- Node.js
+- React 18, React Router 6, Vite 6 và Tailwind CSS
+- Lucide React
 - npm
-- MongoDB neu chay backend local
 
-Chay frontend:
+## Cài đặt và chạy
 
-```bash
-cd frontend
-npm install
-npm run dev
+```powershell
+cd F:\DuAnMoi\frontend
+npm.cmd install
+npm.cmd run dev
 ```
 
-Chay backend:
+Mở `http://127.0.0.1:5173`. Backend phải chạy ở cổng `8787`. Build production bằng `npm.cmd run build`.
 
-```bash
-cd backend
-npm install
-copy .env.example .env
-npm run seed
-npm run dev
-```
+Frontend dùng Vite proxy chuyển `/api` sang backend, nhờ đó cookie đăng nhập hoạt động trong môi trường local.
 
-Mac dinh Vite chay tai:
+## Cấu trúc
 
 ```text
-http://127.0.0.1:5173
+src/
+├── app/                 Router, phân quyền, phiên đăng nhập, menu
+├── layouts/             Layout chung: sidebar, header và Outlet
+├── components/
+│   ├── common/          Component nghiệp vụ dùng lại
+│   └── ui/              Button, Card, Table, Input, Badge
+├── features/            Mỗi chức năng có page riêng
+│   ├── auth/            dashboard/       collaborators/
+│   ├── customers/       points/          history/
+│   ├── referral/        programs/        activity/
+│   ├── risk/            tree/            kpi/
+│   └── payroll/         settings/
+└── lib/                 API client, formatter và tiện ích
 ```
 
-Backend API mac dinh chay tai:
+## Luồng hoạt động
 
 ```text
-http://127.0.0.1:4000/api
+Mở ứng dụng
+→ GET /api/auth/me kiểm tra cookie phiên
+→ Chưa đăng nhập: chuyển đến /login
+→ Đăng nhập thành công: backend đặt httpOnly cookie
+→ ProtectedRoute kiểm tra phiên và quyền
+→ AppLayout hiển thị menu theo vai trò
+→ Outlet hiển thị feature tương ứng
 ```
 
-Tai khoan seed:
+Dashboard lấy số dư ví F/G, lịch sử điểm và đơn hàng từ API thật. Chức năng chưa có dữ liệu hiển thị trạng thái trống, không sử dụng mock data.
+
+## Quản lý tài khoản
+
+Trang `/collaborators` dành cho Super Admin, hiển thị trạng thái, lần đăng nhập gần nhất, lần hoạt động gần nhất, số lần đăng nhập và thao tác khóa/mở khóa.
 
 ```text
-Admin: admin@xkld.local / 123456
-CTV:   ctv@xkld.local / 123456
+Khóa:   POST /api/admin/users/:id/ban
+Mở lại: POST /api/admin/users/:id/unban
 ```
 
-Build ban production:
+## Quy ước phát triển
 
-```bash
-cd frontend
-npm run build
-```
-
-Xem thu ban build:
-
-```bash
-cd frontend
-npm run preview
-```
-
-## Trang thai hien tai
-
-- Day la prototype frontend chay doc lap voi du lieu mau.
-- Chua co backend va chua co API that.
-- Cac thao tac duyet/tu choi diem dang duoc xu ly bang state cuc bo trong React.
-- Khi co backend, co the tach API theo cac nhom: CTV, Customer, Point Program, Point Request, Activity, Risk Signal va Payroll.
-
-## Huong phat trien tiep theo
-
-- Them dang nhap va phan quyen that.
-- Noi API backend.
-- Them form tao CTV, tao khach hang va tao de nghi cong diem.
-- Them validate form.
-- Luu lich su giao dich diem.
-- Xuat bao cao KPI/luong theo thang.
+- Mỗi route nghiệp vụ nằm trong một thư mục `features` riêng.
+- Component dùng lại đặt trong `components/common` hoặc `components/ui`.
+- Request backend khai báo tập trung trong `src/lib/api.js`.
+- Không dùng dữ liệu mẫu; dùng API thật hoặc trạng thái rỗng.
