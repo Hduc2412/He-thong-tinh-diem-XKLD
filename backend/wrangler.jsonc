@@ -1,0 +1,47 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "xkld-tools",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-09",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "xkld-db",
+      "database_id": "84a65d0d-2b1e-4da2-9518-dd3bef9cfa95",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Daily 01:00 UTC = 08:00 Việt Nam — maintenance accrual + rolling-window reset (tech-spec §7).
+  "triggers": { "crons": ["0 1 * * *"] },
+  // Money-handling Worker: keep request + cron logs for production debugging. 100% sampling is
+  // cheap at <1k users; lower head_sampling_rate if volume grows (Mike, PR review).
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+  // "compatibility_flags": [
+  //   "nodejs_compat"
+  // ],
+  // "vars": {
+  //   "MY_VAR": "my-variable"
+  // },
+  // "kv_namespaces": [
+  //   {
+  //     "binding": "MY_KV_NAMESPACE",
+  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  //   }
+  // ],
+  // "r2_buckets": [
+  //   {
+  //     "binding": "MY_BUCKET",
+  //     "bucket_name": "my-bucket"
+  //   }
+  // ],
+  // "d1_databases": [
+  //   {
+  //     "binding": "MY_DB",
+  //     "database_name": "my-database",
+  //     "database_id": ""
+  //   }
+  // ],
+  // "ai": {
+  //   "binding": "AI"
+  // }
+}

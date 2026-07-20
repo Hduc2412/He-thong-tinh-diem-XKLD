@@ -1,0 +1,15 @@
+# Single-package repo. `packages` must be present and non-empty, otherwise
+# pnpm <10.6 aborts install with "packages field missing or empty".
+packages:
+  - .
+# Build-script allowlist. pnpm 11 uses `allowBuilds` (map); pnpm 10 (the CI
+# build env) uses `onlyBuiltDependencies` (list). Keep both so native postinstalls
+# run on either major version.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd
